@@ -9,6 +9,7 @@ using System.Net;
 using System.Net.Http;
 using System.Text.Json;
 using System.Windows.Forms;
+using WebSocket4Net;
 
 namespace _DoljaraApp
 {
@@ -31,9 +32,11 @@ namespace _DoljaraApp
         PictureBox[] rightPUnselected;
 
         Audition audition;
+        string roomId = "";
         int rev = -1;
 
         private static HttpClient httpClient = new HttpClient();
+        private static WebSocket ws;
         private static SoundPlayer soundEffect = new SoundPlayer(Properties.Resources.free_sound12);
 
         public Form1()
@@ -46,7 +49,13 @@ namespace _DoljaraApp
             string settingsJsonText = File.ReadAllText("settings.json");
 
             settings = JsonSerializer.Deserialize<Settings>(settingsJsonText);
+
             timer1.Interval = settings.reloadSec * 1000;
+
+            ws = new WebSocket(settings.WSserverURL);
+            ws.Closed += Ws_Closed;
+            ws.MessageReceived += Ws_MessageReceived;
+            ws.Open();
 
             bottomPScouted = new PictureBox[] {
                 pictureBox1, pictureBox2, pictureBox3, pictureBox4,
@@ -118,254 +127,266 @@ namespace _DoljaraApp
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            timer1.Enabled = false;
-
-            GetJson();
-
-            producers = new Dictionary<string, Producer>();
-            producers.Add("東", audition.eastP);
-            producers.Add("西", audition.westP);
-            producers.Add("南", audition.southP);
-            producers.Add("北", audition.northP);
-
-            for (int i = 0; i < producers[label3.Text].scoutedIdols.Count; i++)
+            MethodInvoker method = () =>
             {
-                string imgPath = "image/bottom_" + producers[label3.Text].scoutedIdols[i].imagePath;
+                timer1.Enabled = false;
 
-                if (bottomPScouted[i].ImageLocation == null ||
-                    !bottomPScouted[i].ImageLocation.Equals(imgPath))
+                GetJson();
+
+                producers = new Dictionary<string, Producer>();
+                producers.Add("東", audition.eastP);
+                producers.Add("西", audition.westP);
+                producers.Add("南", audition.southP);
+                producers.Add("北", audition.northP);
+
+                for (int i = 0; i < producers[label3.Text].scoutedIdols.Count; i++)
                 {
-                    bottomPScouted[i].ImageLocation = imgPath;
-                }
+                    string imgPath = "image/bottom_" + producers[label3.Text].scoutedIdols[i].imagePath;
 
-                bottomPScouted[i].Visible = true;
-            }
-            for (int i = producers[label3.Text].scoutedIdols.Count; i < 9; i++)
-            {
-                bottomPScouted[i].Visible = false;
-            }
-
-            if (producers[label4.Text].debut || 観客モードToolStripMenuItem.Checked)
-            {
-                for (int i = 0; i < producers[label4.Text].scoutedIdols.Count; i++)
-                {
-                    string imgPath = "image/left_" + producers[label4.Text].scoutedIdols[i].imagePath;
-
-                    if (leftPScouted[i].ImageLocation == null ||
-                    !leftPScouted[i].ImageLocation.Equals(imgPath))
+                    if (bottomPScouted[i].ImageLocation == null ||
+                        !bottomPScouted[i].ImageLocation.Equals(imgPath))
                     {
-                        leftPScouted[i].ImageLocation = imgPath;
-
-                        leftPScouted[i].BackColor = Color.White;
+                        bottomPScouted[i].ImageLocation = imgPath;
                     }
 
-                    leftPScouted[i].Visible = true;
+                    bottomPScouted[i].Visible = true;
                 }
+                for (int i = producers[label3.Text].scoutedIdols.Count; i < 9; i++)
+                {
+                    bottomPScouted[i].Visible = false;
+                }
+
+                if (producers[label4.Text].debut || 観客モードToolStripMenuItem.Checked)
+                {
+                    for (int i = 0; i < producers[label4.Text].scoutedIdols.Count; i++)
+                    {
+                        string imgPath = "image/left_" + producers[label4.Text].scoutedIdols[i].imagePath;
+
+                        if (leftPScouted[i].ImageLocation == null ||
+                        !leftPScouted[i].ImageLocation.Equals(imgPath))
+                        {
+                            leftPScouted[i].ImageLocation = imgPath;
+
+                            leftPScouted[i].BackColor = Color.White;
+                        }
+
+                        leftPScouted[i].Visible = true;
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < producers[label4.Text].scoutedIdols.Count; i++)
+                    {
+                        leftPScouted[i].ImageLocation = null;
+
+                        leftPScouted[i].BackColor = Color.Moccasin;
+
+                        leftPScouted[i].Visible = true;
+                    }
+                }
+
+                for (int i = producers[label4.Text].scoutedIdols.Count; i < 9; i++)
+                {
+                    leftPScouted[i].Visible = false;
+                }
+
+                if (producers[label5.Text].debut || 観客モードToolStripMenuItem.Checked)
+                {
+                    for (int i = 0; i < producers[label5.Text].scoutedIdols.Count; i++)
+                    {
+                        string imgPath = "image/top_" + producers[label5.Text].scoutedIdols[i].imagePath;
+
+                        if (topPScouted[i].ImageLocation == null ||
+                        !topPScouted[i].ImageLocation.Equals(imgPath))
+                        {
+                            topPScouted[i].ImageLocation = imgPath;
+
+                            topPScouted[i].BackColor = Color.White;
+                        }
+
+                        topPScouted[i].Visible = true;
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < producers[label5.Text].scoutedIdols.Count; i++)
+                    {
+                        topPScouted[i].ImageLocation = null;
+
+                        topPScouted[i].BackColor = Color.Moccasin;
+
+                        topPScouted[i].Visible = true;
+                    }
+                }
+
+                for (int i = producers[label5.Text].scoutedIdols.Count; i < 9; i++)
+                {
+                    topPScouted[i].Visible = false;
+                }
+
+                if (producers[label6.Text].debut || 観客モードToolStripMenuItem.Checked)
+                {
+                    for (int i = 0; i < producers[label6.Text].scoutedIdols.Count; i++)
+                    {
+                        string imgPath = "image/right_" + producers[label6.Text].scoutedIdols[i].imagePath;
+
+                        if (rightPScouted[i].ImageLocation == null ||
+                        !rightPScouted[i].ImageLocation.Equals(imgPath))
+                        {
+                            rightPScouted[i].ImageLocation = imgPath;
+
+                            rightPScouted[i].BackColor = Color.White;
+                        }
+
+                        rightPScouted[i].Visible = true;
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < producers[label6.Text].scoutedIdols.Count; i++)
+                    {
+                        rightPScouted[i].ImageLocation = null;
+
+                        rightPScouted[i].BackColor = Color.Moccasin;
+
+                        rightPScouted[i].Visible = true;
+                    }
+                }
+
+                for (int i = producers[label6.Text].scoutedIdols.Count; i < 9; i++)
+                {
+                    rightPScouted[i].Visible = false;
+                }
+
+                for (int i = 0; i < producers[label3.Text].unselectedIdols.Count; i++)
+                {
+                    string imgPath = producers[label3.Text].unselectedIdols[i].imagePath;
+
+                    if (bottomPUnselected[i].ImageLocation == null ||
+                        !bottomPUnselected[i].ImageLocation.Equals(imgPath))
+                    {
+                        bottomPUnselected[i].ImageLocation = "image/bottom_" + imgPath;
+
+                        bottomPUnselected[i].BackColor = Color.White;
+
+                        if (producers[label3.Text].unselectedIdols[i].isReached)
+                        {
+                            bottomPUnselected[i].BackColor = Color.LightCoral;
+                        }
+
+                        if (producers[label3.Text].unselectedIdols[i].isDrawn)
+                        {
+                            bottomPUnselected[i].BackColor = Color.Gray;
+                        }
+                    }
+                }
+                for (int i = producers[label3.Text].unselectedIdols.Count; i < 14; i++)
+                {
+                    bottomPUnselected[i].ImageLocation = null;
+
+                    bottomPUnselected[i].BackColor = Color.Transparent;
+                }
+
+                for (int i = 0; i < producers[label4.Text].unselectedIdols.Count; i++)
+                {
+                    string imgPath = producers[label4.Text].unselectedIdols[i].imagePath;
+
+                    if (leftPUnselected[i].ImageLocation == null ||
+                        !leftPUnselected[i].ImageLocation.Equals(imgPath))
+                    {
+                        leftPUnselected[i].ImageLocation = "image/left_" + imgPath;
+
+                        leftPUnselected[i].BackColor = Color.White;
+
+                        if (producers[label4.Text].unselectedIdols[i].isReached)
+                        {
+                            leftPUnselected[i].BackColor = Color.LightCoral;
+                        }
+
+                        if (producers[label4.Text].unselectedIdols[i].isDrawn)
+                        {
+                            leftPUnselected[i].BackColor = Color.Gray;
+                        }
+                    }
+                }
+                for (int i = producers[label4.Text].unselectedIdols.Count; i < 14; i++)
+                {
+                    leftPUnselected[i].ImageLocation = null;
+
+                    leftPUnselected[i].BackColor = Color.Transparent;
+                }
+
+                for (int i = 0; i < producers[label5.Text].unselectedIdols.Count; i++)
+                {
+                    string imgPath = producers[label5.Text].unselectedIdols[i].imagePath;
+
+                    if (topPUnselected[i].ImageLocation == null ||
+                        !topPUnselected[i].ImageLocation.Equals(imgPath))
+                    {
+                        topPUnselected[i].ImageLocation = "image/top_" + imgPath;
+
+                        topPUnselected[i].BackColor = Color.White;
+
+                        if (producers[label5.Text].unselectedIdols[i].isReached)
+                        {
+                            topPUnselected[i].BackColor = Color.LightCoral;
+                        }
+
+                        if (producers[label5.Text].unselectedIdols[i].isDrawn)
+                        {
+                            topPUnselected[i].BackColor = Color.Gray;
+                        }
+                    }
+                }
+                for (int i = producers[label5.Text].unselectedIdols.Count; i < 14; i++)
+                {
+                    topPUnselected[i].ImageLocation = null;
+
+                    topPUnselected[i].BackColor = Color.Transparent;
+                }
+
+                for (int i = 0; i < producers[label6.Text].unselectedIdols.Count; i++)
+                {
+                    string imgPath = producers[label6.Text].unselectedIdols[i].imagePath;
+
+                    if (rightPUnselected[i].ImageLocation == null ||
+                        !rightPUnselected[i].ImageLocation.Equals(imgPath))
+                    {
+                        rightPUnselected[i].ImageLocation = "image/right_" + imgPath;
+
+                        rightPUnselected[i].BackColor = Color.White;
+
+                        if (producers[label6.Text].unselectedIdols[i].isReached)
+                        {
+                            rightPUnselected[i].BackColor = Color.LightCoral;
+                        }
+
+                        if (producers[label6.Text].unselectedIdols[i].isDrawn)
+                        {
+                            rightPUnselected[i].BackColor = Color.Gray;
+                        }
+                    }
+                }
+                for (int i = producers[label6.Text].unselectedIdols.Count; i < 14; i++)
+                {
+                    rightPUnselected[i].ImageLocation = null;
+
+                    rightPUnselected[i].BackColor = Color.Transparent;
+                }
+
+                label2.Text = audition.applicants.Count.ToString();
+
+                timer1.Enabled = true;
+            };
+
+            if (InvokeRequired)
+            {
+                Invoke(method);
             }
             else
             {
-                for (int i = 0; i < producers[label4.Text].scoutedIdols.Count; i++)
-                {
-                    leftPScouted[i].ImageLocation = null;
-
-                    leftPScouted[i].BackColor = Color.Moccasin;
-
-                    leftPScouted[i].Visible = true;
-                }
+                method();
             }
-
-            for (int i = producers[label4.Text].scoutedIdols.Count; i < 9; i++)
-            {
-                leftPScouted[i].Visible = false;
-            }
-
-            if (producers[label5.Text].debut || 観客モードToolStripMenuItem.Checked)
-            {
-                for (int i = 0; i < producers[label5.Text].scoutedIdols.Count; i++)
-                {
-                    string imgPath = "image/top_" + producers[label5.Text].scoutedIdols[i].imagePath;
-
-                    if (topPScouted[i].ImageLocation == null ||
-                    !topPScouted[i].ImageLocation.Equals(imgPath))
-                    {
-                        topPScouted[i].ImageLocation = imgPath;
-
-                        topPScouted[i].BackColor = Color.White;
-                    }
-
-                    topPScouted[i].Visible = true;
-                }
-            }
-            else
-            {
-                for (int i = 0; i < producers[label5.Text].scoutedIdols.Count; i++)
-                {
-                    topPScouted[i].ImageLocation = null;
-
-                    topPScouted[i].BackColor = Color.Moccasin;
-
-                    topPScouted[i].Visible = true;
-                }
-            }
-
-            for (int i = producers[label5.Text].scoutedIdols.Count; i < 9; i++)
-            {
-                topPScouted[i].Visible = false;
-            }
-
-            if (producers[label6.Text].debut || 観客モードToolStripMenuItem.Checked)
-            {
-                for (int i = 0; i < producers[label6.Text].scoutedIdols.Count; i++)
-                {
-                    string imgPath = "image/right_" + producers[label6.Text].scoutedIdols[i].imagePath;
-
-                    if (rightPScouted[i].ImageLocation == null ||
-                    !rightPScouted[i].ImageLocation.Equals(imgPath))
-                    {
-                        rightPScouted[i].ImageLocation = imgPath;
-
-                        rightPScouted[i].BackColor = Color.White;
-                    }
-
-                    rightPScouted[i].Visible = true;
-                }
-            }
-            else
-            {
-                for (int i = 0; i < producers[label6.Text].scoutedIdols.Count; i++)
-                {
-                    rightPScouted[i].ImageLocation = null;
-
-                    rightPScouted[i].BackColor = Color.Moccasin;
-
-                    rightPScouted[i].Visible = true;
-                }
-            }
-
-            for (int i = producers[label6.Text].scoutedIdols.Count; i < 9; i++)
-            {
-                rightPScouted[i].Visible = false;
-            }
-
-            for (int i = 0; i < producers[label3.Text].unselectedIdols.Count; i++)
-            {
-                string imgPath = producers[label3.Text].unselectedIdols[i].imagePath;
-
-                if (bottomPUnselected[i].ImageLocation == null ||
-                    !bottomPUnselected[i].ImageLocation.Equals(imgPath))
-                {
-                    bottomPUnselected[i].ImageLocation = "image/bottom_" + imgPath;
-
-                    bottomPUnselected[i].BackColor = Color.White;
-
-                    if (producers[label3.Text].unselectedIdols[i].isReached)
-                    {
-                        bottomPUnselected[i].BackColor = Color.LightCoral;
-                    }
-
-                    if (producers[label3.Text].unselectedIdols[i].isDrawn)
-                    {
-                        bottomPUnselected[i].BackColor = Color.Gray;
-                    }
-                }
-            }
-            for (int i = producers[label3.Text].unselectedIdols.Count; i < 14; i++)
-            {
-                bottomPUnselected[i].ImageLocation = null;
-
-                bottomPUnselected[i].BackColor = Color.Transparent;
-            }
-
-            for (int i = 0; i < producers[label4.Text].unselectedIdols.Count; i++)
-            {
-                string imgPath = producers[label4.Text].unselectedIdols[i].imagePath;
-
-                if (leftPUnselected[i].ImageLocation == null ||
-                    !leftPUnselected[i].ImageLocation.Equals(imgPath))
-                {
-                    leftPUnselected[i].ImageLocation = "image/left_" + imgPath;
-
-                    leftPUnselected[i].BackColor = Color.White;
-
-                    if (producers[label4.Text].unselectedIdols[i].isReached)
-                    {
-                        leftPUnselected[i].BackColor = Color.LightCoral;
-                    }
-
-                    if (producers[label4.Text].unselectedIdols[i].isDrawn)
-                    {
-                        leftPUnselected[i].BackColor = Color.Gray;
-                    }
-                }
-            }
-            for (int i = producers[label4.Text].unselectedIdols.Count; i < 14; i++)
-            {
-                leftPUnselected[i].ImageLocation = null;
-
-                leftPUnselected[i].BackColor = Color.Transparent;
-            }
-
-            for (int i = 0; i < producers[label5.Text].unselectedIdols.Count; i++)
-            {
-                string imgPath = producers[label5.Text].unselectedIdols[i].imagePath;
-
-                if (topPUnselected[i].ImageLocation == null ||
-                    !topPUnselected[i].ImageLocation.Equals(imgPath))
-                {
-                    topPUnselected[i].ImageLocation = "image/top_" + imgPath;
-
-                    topPUnselected[i].BackColor = Color.White;
-
-                    if (producers[label5.Text].unselectedIdols[i].isReached)
-                    {
-                        topPUnselected[i].BackColor = Color.LightCoral;
-                    }
-
-                    if (producers[label5.Text].unselectedIdols[i].isDrawn)
-                    {
-                        topPUnselected[i].BackColor = Color.Gray;
-                    }
-                }
-            }
-            for (int i = producers[label5.Text].unselectedIdols.Count; i < 14; i++)
-            {
-                topPUnselected[i].ImageLocation = null;
-
-                topPUnselected[i].BackColor = Color.Transparent;
-            }
-
-            for (int i = 0; i < producers[label6.Text].unselectedIdols.Count; i++)
-            {
-                string imgPath = producers[label6.Text].unselectedIdols[i].imagePath;
-
-                if (rightPUnselected[i].ImageLocation == null ||
-                    !rightPUnselected[i].ImageLocation.Equals(imgPath))
-                {
-                    rightPUnselected[i].ImageLocation = "image/right_" + imgPath;
-
-                    rightPUnselected[i].BackColor = Color.White;
-
-                    if (producers[label6.Text].unselectedIdols[i].isReached)
-                    {
-                        rightPUnselected[i].BackColor = Color.LightCoral;
-                    }
-
-                    if (producers[label6.Text].unselectedIdols[i].isDrawn)
-                    {
-                        rightPUnselected[i].BackColor = Color.Gray;
-                    }
-                }
-            }
-            for (int i = producers[label6.Text].unselectedIdols.Count; i < 14; i++)
-            {
-                rightPUnselected[i].ImageLocation = null;
-
-                rightPUnselected[i].BackColor = Color.Transparent;
-            }
-
-            label2.Text = audition.applicants.Count.ToString();
-
-            timer1.Enabled = true;
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -381,8 +402,11 @@ namespace _DoljaraApp
 
                 PutJson();
             }
-
-            timer1_Tick(null, null);
+            
+            if (ws.State != WebSocketState.Open)
+            {
+                timer1_Tick(null, null);
+            }
         }
 
         private void scoutedIdol_Click(object sender, EventArgs e)
@@ -402,7 +426,10 @@ namespace _DoljaraApp
                 PutJson();
             }
 
-            timer1_Tick(null, null);
+            if (ws.State != WebSocketState.Open)
+            {
+                timer1_Tick(null, null);
+            }
         }
 
         private void unselectedIdol_Click(object sender, EventArgs e)
@@ -503,7 +530,10 @@ namespace _DoljaraApp
                 }
             }
 
-            timer1_Tick(null, null);
+            if (ws.State != WebSocketState.Open)
+            {
+                timer1_Tick(null, null);
+            }
         }
 
         private void toolStripButton1_Click(object sender, EventArgs e)
@@ -566,7 +596,10 @@ namespace _DoljaraApp
                 PutJson();
             }
 
-            timer1_Tick(null, null);
+            if (ws.State != WebSocketState.Open)
+            {
+                timer1_Tick(null, null);
+            }
         }
 
         private void toolStripButton2_Click(object sender, EventArgs e)
@@ -601,7 +634,10 @@ namespace _DoljaraApp
                 PutJson();
             }
 
-            timer1_Tick(null, null);
+            if (ws.State != WebSocketState.Open)
+            {
+                timer1_Tick(null, null);
+            }
         }
 
         private void toolStripSplitButton1_DropDownItemClicked(object sender, ToolStripItemClickedEventArgs e)
@@ -650,7 +686,7 @@ namespace _DoljaraApp
 
         private void GetJson()
         {
-            var result = httpClient.GetAsync(settings.serverURL).Result;
+            var result = httpClient.GetAsync(settings.APIserverURL).Result;
             if (result.StatusCode != HttpStatusCode.OK)
             {
                 MessageBox.Show(
@@ -664,6 +700,8 @@ namespace _DoljaraApp
 
             var response = JsonSerializer.Deserialize<Response>(result.Content.ReadAsStringAsync().Result);
             audition = response.room.raw.data;
+
+            roomId = response.room.code;
 
             if (rev != response.room.raw.rev)
             {
@@ -681,7 +719,7 @@ namespace _DoljaraApp
             content.Headers.ContentType.MediaType = "application/json";
 
             var result = httpClient.PutAsync(
-                settings.serverURL + "&origrev=" + rev.ToString(), content).Result;
+                settings.APIserverURL + "&origrev=" + rev.ToString(), content).Result;
 
             if (result.StatusCode == HttpStatusCode.Conflict)
             {
@@ -703,6 +741,27 @@ namespace _DoljaraApp
                     MessageBoxIcon.Error);
 
                 this.Close();
+            }
+
+            if (ws.State == WebSocketState.Open)
+            {
+                var messageJson = new Room();
+                messageJson.code = roomId;
+                ws.Send(JsonSerializer.Serialize(messageJson));
+            }
+        }
+
+        private void Ws_Closed(object sender, EventArgs e)
+        {
+            ws.Open();
+        }
+
+        private void Ws_MessageReceived(object sender, MessageReceivedEventArgs e)
+        {
+            var messageJson = JsonSerializer.Deserialize<Room>(e.Message);
+            if (messageJson.code.Equals(roomId))
+            {
+                timer1_Tick(null, null);
             }
         }
     }

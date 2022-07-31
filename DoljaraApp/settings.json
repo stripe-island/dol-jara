@@ -1,6 +1,7 @@
 {
-	"reloadSec": 10,
-	"serverURL": "https://xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/DoljaraRooms?rid=ROOM-n8kyC7uqLT",
+	"reloadSec": 15,
+	"APIserverURL": "https://xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/DoljaraRooms?rid=ROOM-n8kyC7uqLT",
+	"WSserverURL": "ws://xxxxxxxxxxxxxx:xxxx/DoljaraRealtimeSync",
 	"allIdols": [
 		{
 			"id": "a01-1",

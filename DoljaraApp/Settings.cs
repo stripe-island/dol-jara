@@ -6,7 +6,9 @@ namespace _DoljaraApp
     {
         public int reloadSec { get; set; }
 
-        public string serverURL { get; set; }
+        public string APIserverURL { get; set; }
+
+        public string WSserverURL { get; set; }
 
         public List<Idol> allIdols { get; set; }
     }
