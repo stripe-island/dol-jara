@@ -451,104 +451,94 @@ namespace _DoljaraApp
         {
             timer1.Enabled = false;
 
-            Producer p = producers[label3.Text];
+            Producer fromP = null;
+            int index = -1;
 
-            if (p.scoutedIdols.Count < 8)
+            if (fromP == null)
             {
-                int index;
-
                 index = Array.IndexOf(bottomPUnselected, sender);
-                if (index != -1 && !bottomPUnselected[index].BackColor.Equals(Color.Transparent) &&
-                    !producers[label3.Text].unselectedIdols[index].isDrawn)
+                if (index != -1 && !bottomPUnselected[index].BackColor.Equals(Color.Transparent))
                 {
-                    Idol clone = new Idol();
-
-                    clone.id = producers[label3.Text].unselectedIdols[index].id;
-                    clone.imagePath = producers[label3.Text].unselectedIdols[index].imagePath;
-                    clone.isReached = false;
-                    clone.isDrawn = false;
-
-                    p.scoutedIdols.Add(clone);
-                    p.scoutedIdols = p.scoutedIdols.OrderBy(idol => idol.id).ToList();
-
-                    producers[label3.Text].unselectedIdols[index].isDrawn = true;
-
-                    PutJson();
+                    fromP = producers[label3.Text];
                 }
-
+            }
+            if (fromP == null)
+            {
                 index = Array.IndexOf(leftPUnselected, sender);
-                if (index != -1 && !leftPUnselected[index].BackColor.Equals(Color.Transparent) &&
-                    !producers[label4.Text].unselectedIdols[index].isDrawn)
+                if (index != -1 && !leftPUnselected[index].BackColor.Equals(Color.Transparent))
                 {
-                    Idol clone = new Idol();
-
-                    clone.id = producers[label4.Text].unselectedIdols[index].id;
-                    clone.imagePath = producers[label4.Text].unselectedIdols[index].imagePath;
-                    clone.isReached = false;
-                    clone.isDrawn = false;
-
-                    p.scoutedIdols.Add(clone);
-                    p.scoutedIdols = p.scoutedIdols.OrderBy(idol => idol.id).ToList();
-
-                    producers[label4.Text].unselectedIdols[index].isDrawn = true;
-
-                    PutJson();
+                    fromP = producers[label4.Text];
                 }
-
+            }
+            if (fromP == null)
+            {
                 index = Array.IndexOf(topPUnselected, sender);
-                if (index != -1 && !topPUnselected[index].BackColor.Equals(Color.Transparent) &&
-                    !producers[label5.Text].unselectedIdols[index].isDrawn)
+                if (index != -1 && !topPUnselected[index].BackColor.Equals(Color.Transparent))
                 {
-                    Idol clone = new Idol();
-
-                    clone.id = producers[label5.Text].unselectedIdols[index].id;
-                    clone.imagePath = producers[label5.Text].unselectedIdols[index].imagePath;
-                    clone.isReached = false;
-                    clone.isDrawn = false;
-
-                    p.scoutedIdols.Add(clone);
-                    p.scoutedIdols = p.scoutedIdols.OrderBy(idol => idol.id).ToList();
-
-                    producers[label5.Text].unselectedIdols[index].isDrawn = true;
-
-                    PutJson();
+                    fromP = producers[label5.Text];
                 }
-
+            }
+            if (fromP == null)
+            {
                 index = Array.IndexOf(rightPUnselected, sender);
-                if (index != -1 && !rightPUnselected[index].BackColor.Equals(Color.Transparent) &&
-                    !producers[label6.Text].unselectedIdols[index].isDrawn)
+                if (index != -1 && !rightPUnselected[index].BackColor.Equals(Color.Transparent))
                 {
-                    Idol clone = new Idol();
+                    fromP = producers[label6.Text];
+                }
+            }
 
-                    clone.id = producers[label6.Text].unselectedIdols[index].id;
-                    clone.imagePath = producers[label6.Text].unselectedIdols[index].imagePath;
-                    clone.isReached = false;
-                    clone.isDrawn = false;
+            Producer p = null;
+            if (producers[label3.Text].scoutedIdols.Count < 8)
+            {
+                p = producers[label3.Text];
+            }
+            if (producers[label4.Text].scoutedIdols.Count < 8)
+            {
+                p = producers[label4.Text];
+            }
+            if (producers[label5.Text].scoutedIdols.Count < 8)
+            {
+                p = producers[label5.Text];
+            }
+            if (producers[label6.Text].scoutedIdols.Count < 8)
+            {
+                p = producers[label6.Text];
+            }
 
-                    p.scoutedIdols.Add(clone);
-                    p.scoutedIdols = p.scoutedIdols.OrderBy(idol => idol.id).ToList();
-
-                    producers[label6.Text].unselectedIdols[index].isDrawn = true;
-
-                    PutJson();
+            if (p != null)
+            {
+                if (!fromP.unselectedIdols[index].isDrawn)
+                {
+                    ScoutUnselectedIdol(p, fromP.unselectedIdols[index]);
                 }
             }
             else
             {
-                int index = Array.IndexOf(bottomPUnselected, sender);
-
-                if (index != -1 && !bottomPUnselected[index].BackColor.Equals(Color.Transparent))
-                {
-                    p.unselectedIdols[index].isReached = !p.unselectedIdols[index].isReached;
-
-                    PutJson();
-                }
+                fromP.unselectedIdols[index].isReached = !fromP.unselectedIdols[index].isReached;
+                PutJson();
             }
 
             if (ws.State != WebSocketState.Open)
             {
                 timer1_Tick(null, null);
             }
+        }
+
+        private void ScoutUnselectedIdol(Producer producer, Idol targetIdol)
+        {
+            Idol clone = new Idol();
+
+            clone.id = targetIdol.id;
+            clone.imagePath = targetIdol.imagePath;
+            clone.isReached = false;
+            clone.isDrawn = false;
+
+            producer.scoutedIdols.Add(clone);
+            producer.scoutedIdols = producer.scoutedIdols.OrderBy(idol => idol.id).ToList();
+
+            targetIdol.isDrawn = true;
+
+            PutJson();
         }
 
         private void toolStripButton1_Click(object sender, EventArgs e)
