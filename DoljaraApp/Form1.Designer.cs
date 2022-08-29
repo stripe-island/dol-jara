@@ -152,6 +152,7 @@ namespace _DoljaraApp
             this.label5 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.自分のアイドルを非表示ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.panel1.SuspendLayout();
@@ -281,7 +282,8 @@ namespace _DoljaraApp
             this.南ToolStripMenuItem,
             this.北ToolStripMenuItem,
             this.toolStripSeparator3,
-            this.観客モードToolStripMenuItem});
+            this.観客モードToolStripMenuItem,
+            this.自分のアイドルを非表示ToolStripMenuItem});
             this.toolStripSplitButton1.Image = ((System.Drawing.Image)(resources.GetObject("toolStripSplitButton1.Image")));
             this.toolStripSplitButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripSplitButton1.Name = "toolStripSplitButton1";
@@ -292,36 +294,36 @@ namespace _DoljaraApp
             // 東ToolStripMenuItem
             // 
             this.東ToolStripMenuItem.Name = "東ToolStripMenuItem";
-            this.東ToolStripMenuItem.Size = new System.Drawing.Size(188, 34);
+            this.東ToolStripMenuItem.Size = new System.Drawing.Size(288, 34);
             this.東ToolStripMenuItem.Text = "東";
             // 
             // 西ToolStripMenuItem
             // 
             this.西ToolStripMenuItem.Name = "西ToolStripMenuItem";
-            this.西ToolStripMenuItem.Size = new System.Drawing.Size(188, 34);
+            this.西ToolStripMenuItem.Size = new System.Drawing.Size(288, 34);
             this.西ToolStripMenuItem.Text = "西";
             // 
             // 南ToolStripMenuItem
             // 
             this.南ToolStripMenuItem.Name = "南ToolStripMenuItem";
-            this.南ToolStripMenuItem.Size = new System.Drawing.Size(188, 34);
+            this.南ToolStripMenuItem.Size = new System.Drawing.Size(288, 34);
             this.南ToolStripMenuItem.Text = "南";
             // 
             // 北ToolStripMenuItem
             // 
             this.北ToolStripMenuItem.Name = "北ToolStripMenuItem";
-            this.北ToolStripMenuItem.Size = new System.Drawing.Size(188, 34);
+            this.北ToolStripMenuItem.Size = new System.Drawing.Size(288, 34);
             this.北ToolStripMenuItem.Text = "北";
             // 
             // toolStripSeparator3
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(185, 6);
+            this.toolStripSeparator3.Size = new System.Drawing.Size(285, 6);
             // 
             // 観客モードToolStripMenuItem
             // 
             this.観客モードToolStripMenuItem.Name = "観客モードToolStripMenuItem";
-            this.観客モードToolStripMenuItem.Size = new System.Drawing.Size(188, 34);
+            this.観客モードToolStripMenuItem.Size = new System.Drawing.Size(288, 34);
             this.観客モードToolStripMenuItem.Text = "観客モード";
             // 
             // toolStripSeparator1
@@ -1863,6 +1865,12 @@ namespace _DoljaraApp
             this.timer1.Interval = 10000;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
+            // 自分のアイドルを非表示ToolStripMenuItem
+            // 
+            this.自分のアイドルを非表示ToolStripMenuItem.Name = "自分のアイドルを非表示ToolStripMenuItem";
+            this.自分のアイドルを非表示ToolStripMenuItem.Size = new System.Drawing.Size(288, 34);
+            this.自分のアイドルを非表示ToolStripMenuItem.Text = "自分のアイドルを非表示";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 18F);
@@ -2121,6 +2129,7 @@ namespace _DoljaraApp
         private System.Windows.Forms.Timer timer1;
         private System.Windows.Forms.ToolStripMenuItem 観客モードToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
+        private System.Windows.Forms.ToolStripMenuItem 自分のアイドルを非表示ToolStripMenuItem;
     }
 }
 

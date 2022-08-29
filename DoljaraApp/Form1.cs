@@ -139,18 +139,33 @@ namespace _DoljaraApp
                 producers.Add("南", audition.southP);
                 producers.Add("北", audition.northP);
 
-                for (int i = 0; i < producers[label3.Text].scoutedIdols.Count; i++)
+                if (!自分のアイドルを非表示ToolStripMenuItem.Checked)
                 {
-                    string imgPath = "image/bottom_" + producers[label3.Text].scoutedIdols[i].imagePath;
-
-                    if (bottomPScouted[i].ImageLocation == null ||
-                        !bottomPScouted[i].ImageLocation.Equals(imgPath))
+                    for (int i = 0; i < producers[label3.Text].scoutedIdols.Count; i++)
                     {
-                        bottomPScouted[i].ImageLocation = imgPath;
-                    }
+                        string imgPath = "image/bottom_" + producers[label3.Text].scoutedIdols[i].imagePath;
 
-                    bottomPScouted[i].Visible = true;
+                        if (bottomPScouted[i].ImageLocation == null ||
+                            !bottomPScouted[i].ImageLocation.Equals(imgPath))
+                        {
+                            bottomPScouted[i].ImageLocation = imgPath;
+                            bottomPScouted[i].BackColor = Color.White;
+                        }
+
+                        bottomPScouted[i].Visible = true;
+                    }
                 }
+                else
+                {
+                    for (int i = 0; i < producers[label3.Text].scoutedIdols.Count; i++)
+                    {
+                        bottomPScouted[i].ImageLocation = null;
+                        bottomPScouted[i].BackColor = Color.Moccasin;
+                        bottomPScouted[i].Visible = true;
+                    }
+                }
+
+                // 手牌の数より多い表示枠を非表示にする
                 for (int i = producers[label3.Text].scoutedIdols.Count; i < 9; i++)
                 {
                     bottomPScouted[i].Visible = false;
@@ -679,9 +694,21 @@ namespace _DoljaraApp
                     break;
                 case "観客モード":
                     観客モードToolStripMenuItem.Checked = !観客モードToolStripMenuItem.Checked;
-                    button1.Enabled = !button1.Enabled;
+                    if (観客モードToolStripMenuItem.Checked)
+                    {
+                        自分のアイドルを非表示ToolStripMenuItem.Checked = false;
+                    }
+                    break;
+                case "自分のアイドルを非表示":
+                    自分のアイドルを非表示ToolStripMenuItem.Checked = !自分のアイドルを非表示ToolStripMenuItem.Checked;
+                    if (自分のアイドルを非表示ToolStripMenuItem.Checked)
+                    {
+                        観客モードToolStripMenuItem.Checked = false;
+                    }
                     break;
             }
+
+            button1.Enabled = !(観客モードToolStripMenuItem.Checked | 自分のアイドルを非表示ToolStripMenuItem.Checked);
         }
 
         private void GetJson()
